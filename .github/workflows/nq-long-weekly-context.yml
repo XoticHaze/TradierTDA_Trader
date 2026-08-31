@@ -1,0 +1,87 @@
+name: nq-long-weekly-context
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [h12_vol10, h24_vol05]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact research harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/XoticHaze/TextConverterToolbox.git harness
+          git -C harness checkout --detach 0fee1e8901bbd76ff0e9be370886a66dd2f13457
+          test "$(git -C harness rev-parse HEAD)" = "0fee1e8901bbd76ff0e9be370886a66dd2f13457"
+
+      - name: Download frozen intraday CC0 NQ source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source result
+          curl --fail --location --retry 4 --retry-all-errors \
+            'https://www.kaggle.com/api/v1/datasets/download/tgtanalytics/nq-futures-1min-bar-2022-2025' \
+            -o source/nq-intraday.zip
+          unzip -q source/nq-intraday.zip -d source/intraday
+          mapfile -t csvs < <(find source/intraday -type f -iname '*.csv' -print)
+          test "${#csvs[@]}" -eq 1
+          cp "${csvs[0]}" source/nq-intraday.csv
+          test "$(sha256sum source/nq-intraday.csv | awk '{print $1}')" = "1577e60a7feab411e49da7a56c7052a64738cd1757cfd60aa11fd783ff43b60b"
+
+      - name: Download CC0 long weekly NQ source
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 4 --retry-all-errors \
+            'https://www.kaggle.com/api/v1/datasets/download/youneseloiarm/nasdaq-cme-future-nq' \
+            -o source/nq-long.zip
+          unzip -q source/nq-long.zip -d source/long
+          test -f source/long/NQ_in_weekly.csv
+          sha256sum source/long/NQ_in_weekly.csv | tee result/nq-long-weekly.sha256
+
+      - name: Install bounded dependencies
+        run: python -m pip install --disable-pip-version-check -q pandas numpy scikit-learn
+
+      - name: Normalize exact intraday source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd harness
+          python -m research.nq_cc0_corpus_audit \
+            --input ../source/nq-intraday.csv \
+            --output-json ../result/audit.json \
+            --output-normalized ../result/nq-normalized.csv.gz
+
+      - name: Execute long-weekly context ablation
+        shell: bash
+        env:
+          CONFIG_KEY: ${{ matrix.config }}
+        run: |
+          set -euo pipefail
+          cd harness
+          python -m research.nq_long_weekly_context_ablation \
+            --config-key "$CONFIG_KEY" \
+            --nq-normalized ../result/nq-normalized.csv.gz \
+            --nq-weekly ../source/long/NQ_in_weekly.csv \
+            --output "../result/${CONFIG_KEY}.json"
+
+      - name: Upload metrics only
+        uses: actions/upload-artifact@v4
+        with:
+          name: nq-long-weekly-context-${{ matrix.config }}
+          path: |
+            result/${{ matrix.config }}.json
+            result/nq-long-weekly.sha256
+          if-no-files-found: error
+          retention-days: 30
