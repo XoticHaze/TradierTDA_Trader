@@ -22,8 +22,8 @@ jobs:
         run: |
           set -euo pipefail
           git clone --filter=blob:none https://github.com/XoticHaze/TextConverterToolbox.git harness
-          git -C harness checkout --detach 0fee1e8901bbd76ff0e9be370886a66dd2f13457
-          test "$(git -C harness rev-parse HEAD)" = "0fee1e8901bbd76ff0e9be370886a66dd2f13457"
+          git -C harness checkout --detach a55fe471760cf7364900acc8f117bdcd3051e864
+          test "$(git -C harness rev-parse HEAD)" = "a55fe471760cf7364900acc8f117bdcd3051e864"
 
       - name: Download frozen intraday CC0 NQ source
         shell: bash
@@ -63,14 +63,14 @@ jobs:
             --output-json ../result/audit.json \
             --output-normalized ../result/nq-normalized.csv.gz
 
-      - name: Execute long-weekly context ablation
+      - name: Execute clean 1999+ weekly-context ablation
         shell: bash
         env:
           CONFIG_KEY: ${{ matrix.config }}
         run: |
           set -euo pipefail
           cd harness
-          python -m research.nq_long_weekly_context_ablation \
+          python -m research.nq_long_weekly_context_ablation_v2 \
             --config-key "$CONFIG_KEY" \
             --nq-normalized ../result/nq-normalized.csv.gz \
             --nq-weekly ../source/long/NQ_in_weekly.csv \
