@@ -1,0 +1,30 @@
+{
+  "schema": "xotichaze.public_market_data.v1",
+  "dataset_id": "mnq-data-fc5508",
+  "asset_type": "futures",
+  "symbol": "MNQ",
+  "timeframe": "sparse_trade_minutes",
+  "representation": "individual_contract_last_trade_ohlcv",
+  "redistribution": {
+    "status": "unknown",
+    "basis": "The exact upstream GitHub repository/commit is publicly readable, but its repository root contains no explicit license or redistribution grant at this identity. Consume from the original public source; do not mirror payload bytes here until rights are explicit."
+  },
+  "provenance": {
+    "source_kind": "public_git_repository",
+    "source_identity": "mbytes21/MNQ_DATA",
+    "source_commit": "fc5508e2c152938d6d9eb70a36b888ae26107176",
+    "notes": "Exact source used by the first deep-history Foundry campaign. Required anchor: plaintext_csv/MNQ 06-19/20190505.Last.csv."
+  },
+  "content": {
+    "format": "csv",
+    "compression": null,
+    "aggregate_sha256": null,
+    "aggregate_bytes": null,
+    "rows": null,
+    "first_timestamp": null,
+    "last_timestamp": null,
+    "source_reference": "mbytes21/MNQ_DATA@fc5508e2c152938d6d9eb70a36b888ae26107176/plaintext_csv",
+    "payloads": []
+  },
+  "research_only": true
+}

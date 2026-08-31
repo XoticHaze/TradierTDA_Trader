@@ -1,0 +1,78 @@
+{
+  "schema": "xotichaze.public_market_data_compute_run.v1",
+  "run_id": 33358444298,
+  "runner_repository": "XoticHaze/TextConverterToolbox",
+  "runner_head_sha": "ac414b1d5d97aed6625013067e788c1b9240df58",
+  "temporary_transport": true,
+  "retention_days": 7,
+  "authority": "transport_only",
+  "research_only": true,
+  "datasets": [
+    {
+      "id": "es",
+      "dataset": "choweric/cme-es",
+      "version": 2,
+      "license": "CC BY-SA 4.0",
+      "source_archive_sha256": "6a2470413885acb813df3cba99cef6005bcb31c8d40cbf43346df65e54ea1cd0",
+      "source_archive_bytes": 383493,
+      "artifact_id": 9745885096,
+      "artifact_digest": "sha256:591831e036fc890a0ff8678d107d608a86733bfb205c6dc90815ba93a419f4d6",
+      "artifact_expires_at": "2026-09-07T04:50:07Z"
+    },
+    {
+      "id": "nq",
+      "dataset": "choweric/cme-nasdaq",
+      "version": 1,
+      "license": "CC BY-SA 4.0",
+      "source_archive_sha256": "ce5736dd9de607874bdd7923f8464e34751de36ad7a647b5da7ba440eff28ab8",
+      "source_archive_bytes": 353421,
+      "artifact_id": 9745884998,
+      "artifact_digest": "sha256:b5a81c93c3840b6979fe32e98de777a01a9bb13aac95ce49782d63550dbc418c",
+      "artifact_expires_at": "2026-09-07T04:50:07Z"
+    },
+    {
+      "id": "ng",
+      "dataset": "choweric/nymex-ng",
+      "version": 1,
+      "license": "CC BY-SA 4.0",
+      "source_archive_sha256": "9f68fdd3cdc62c51d3319ebefb6cce6855b38bb230181695a827d17aa24c7c1a",
+      "source_archive_bytes": 4417554,
+      "artifact_id": 9745885251,
+      "artifact_digest": "sha256:bfb564c1e282dd347ab026ff2afa3b8b38cd03ac5319d35cd5bfc3415d6d3899",
+      "artifact_expires_at": "2026-09-07T04:50:07Z"
+    },
+    {
+      "id": "zs",
+      "dataset": "choweric/cbot-soybeans",
+      "version": 1,
+      "license": "CC BY-SA 4.0",
+      "source_archive_sha256": "a6ed16ba5005395e671a7d8b2acfbafa4ec3246d632b0c8327e2aee920485664",
+      "source_archive_bytes": 1245832,
+      "artifact_id": 9745885399,
+      "artifact_digest": "sha256:14976420b2c5704e9dcdd52af7a4bf89f0e3adefd217ee7cfa6d5c2720de1e28",
+      "artifact_expires_at": "2026-09-07T04:50:08Z"
+    },
+    {
+      "id": "6e",
+      "dataset": "choweric/cme-euro",
+      "version": 1,
+      "license": "CC BY-SA 4.0",
+      "source_archive_sha256": "2ef82d2da429d9e3019aa24d7489bc317d5db0ccfdcefd8118749e4e216c8aeb",
+      "source_archive_bytes": 676895,
+      "artifact_id": 9745885502,
+      "artifact_digest": "sha256:e0eaae55c74dfdb7d22d924a6d9ccf151e73774ed6fd3dfb7bdf941a0032e054",
+      "artifact_expires_at": "2026-09-07T04:50:08Z"
+    },
+    {
+      "id": "mnq",
+      "dataset": "brandenmorris/mnq-1m-q4-2022-q4-2025-ts-ohlcv-sym",
+      "version": 1,
+      "license": "CC BY 4.0",
+      "source_archive_sha256": "633eb4338a3aa60aedb542b12085acca29ff237c7cadff65442a638466f37667",
+      "source_archive_bytes": 37195905,
+      "artifact_id": 9745886056,
+      "artifact_digest": "sha256:b3e65daa706af3ddd76daf6f3cb6ae579559f398f04ba4ab1ea9a3570a0fb496",
+      "artifact_expires_at": "2026-09-07T04:50:09Z"
+    }
+  ]
+}

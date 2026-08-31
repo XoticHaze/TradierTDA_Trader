@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "xotichaze.public_market_data.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "dataset_id",
+    "asset_type",
+    "symbol",
+    "timeframe",
+    "representation",
+    "redistribution",
+    "provenance",
+    "content",
+    "research_only"
+  ],
+  "properties": {
+    "schema": {"const": "xotichaze.public_market_data.v1"},
+    "dataset_id": {"type": "string", "minLength": 1},
+    "asset_type": {"type": "string", "minLength": 1},
+    "symbol": {"type": "string", "minLength": 1},
+    "timeframe": {"type": "string", "minLength": 1},
+    "representation": {"type": "string", "minLength": 1},
+    "redistribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "basis"],
+      "properties": {
+        "status": {"enum": ["allowed", "unknown", "prohibited"]},
+        "basis": {"type": "string", "minLength": 1}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["source_kind", "source_identity"],
+      "properties": {
+        "source_kind": {"type": "string", "minLength": 1},
+        "source_identity": {"type": "string", "minLength": 1},
+        "source_commit": {"type": ["string", "null"]},
+        "notes": {"type": ["string", "null"]}
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "payloads"],
+      "properties": {
+        "format": {"type": "string", "minLength": 1},
+        "compression": {"type": ["string", "null"]},
+        "aggregate_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "aggregate_bytes": {"type": ["integer", "null"], "minimum": 1},
+        "rows": {"type": ["integer", "null"], "minimum": 1},
+        "first_timestamp": {"type": ["string", "null"]},
+        "last_timestamp": {"type": ["string", "null"]},
+        "source_reference": {"type": ["string", "null"]},
+        "payloads": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "sha256", "bytes"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "bytes": {"type": "integer", "minimum": 1},
+              "release_tag": {"type": ["string", "null"]},
+              "path": {"type": ["string", "null"]}
+            }
+          }
+        }
+      }
+    },
+    "research_only": {"const": true}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "redistribution": {
+            "properties": {"status": {"const": "allowed"}},
+            "required": ["status"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "content": {
+            "required": ["aggregate_sha256", "aggregate_bytes"],
+            "properties": {
+              "aggregate_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "aggregate_bytes": {"type": "integer", "minimum": 1},
+              "payloads": {"minItems": 1}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "content": {
+            "properties": {
+              "payloads": {"maxItems": 0}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

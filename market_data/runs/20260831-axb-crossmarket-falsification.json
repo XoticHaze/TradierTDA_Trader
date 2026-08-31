@@ -1,0 +1,24 @@
+{
+  "schema": "xotichaze.public_compute_research_result.v1",
+  "run_id": 33358951330,
+  "runner_repository": "XoticHaze/TextConverterToolbox",
+  "runner_head_sha": "63de133e787146879f055623d1f54dd16d4ffbe3",
+  "source_repo": "axb0306/cme-futures-ohlc",
+  "source_commit": "60abd3fb6369c6ce0b6a4a65b0f2562fc96b1264",
+  "source_bytes_rehosted": false,
+  "result_artifact_id": 9746057366,
+  "result_artifact_digest": "sha256:3da6364f204f645def8745c0cb92c6909a38683effa47ec516b6dcb140aa7160",
+  "result_artifact_expires_at": "2026-09-14T05:00:18Z",
+  "receipt_sha256": "6b76dc1444eea500f725ecf4f2bf8fae5cfd67438bbda56ad765e8cc09967795",
+  "feature_contract": "foundry.external_mnq_causal_features.v1",
+  "target_contract": "forward_12bar_close_direction.v1",
+  "research_only": true,
+  "promotion_authority": false,
+  "roots": {
+    "CL": {"training_rows": 6794, "oos_rows": 3397, "majority_ba": 0.5, "ret1_ba": 0.4988625366, "logistic_ba": 0.5068146117, "hist_gradient_boosting_ba": 0.5015713755},
+    "GC": {"training_rows": 5802, "oos_rows": 2901, "majority_ba": 0.5, "ret1_ba": 0.5049636201, "logistic_ba": 0.5080029640, "hist_gradient_boosting_ba": 0.5109826570},
+    "MNQ": {"training_rows": 6878, "oos_rows": 3439, "majority_ba": 0.5, "ret1_ba": 0.5012727226, "logistic_ba": 0.5212441828, "hist_gradient_boosting_ba": 0.4902585298},
+    "NQ": {"training_rows": 6865, "oos_rows": 3433, "majority_ba": 0.5, "ret1_ba": 0.5036143331, "logistic_ba": 0.5129048409, "hist_gradient_boosting_ba": 0.4989341154},
+    "ZN": {"training_rows": 4219, "oos_rows": 2110, "majority_ba": 0.5, "ret1_ba": 0.4872487576, "logistic_ba": 0.5143128323, "hist_gradient_boosting_ba": 0.4926941038}
+  }
+}
