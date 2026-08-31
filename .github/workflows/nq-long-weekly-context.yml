@@ -68,20 +68,27 @@ jobs:
         env:
           CONFIG_KEY: ${{ matrix.config }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
           cd harness
           python -m research.nq_long_weekly_context_ablation_v2 \
             --config-key "$CONFIG_KEY" \
             --nq-normalized ../result/nq-normalized.csv.gz \
             --nq-weekly ../source/long/NQ_in_weekly.csv \
-            --output "../result/${CONFIG_KEY}.json"
+            --output "../result/${CONFIG_KEY}.json" \
+            2>&1 | tee "../result/${CONFIG_KEY}.log"
+          rc=${PIPESTATUS[0]}
+          echo "ABLATION_EXIT_CODE=$rc" | tee -a "../result/${CONFIG_KEY}.log"
+          exit "$rc"
 
-      - name: Upload metrics only
+      - name: Upload metrics and failure evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: nq-long-weekly-context-${{ matrix.config }}
           path: |
             result/${{ matrix.config }}.json
+            result/${{ matrix.config }}.log
             result/nq-long-weekly.sha256
+            result/audit.json
           if-no-files-found: error
           retention-days: 30
