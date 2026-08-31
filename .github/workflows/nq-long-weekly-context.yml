@@ -22,8 +22,8 @@ jobs:
         run: |
           set -euo pipefail
           git clone --filter=blob:none https://github.com/XoticHaze/TextConverterToolbox.git harness
-          git -C harness checkout --detach a55fe471760cf7364900acc8f117bdcd3051e864
-          test "$(git -C harness rev-parse HEAD)" = "a55fe471760cf7364900acc8f117bdcd3051e864"
+          git -C harness checkout --detach eb30a4b96d24ba228e2543c5e067b67af0cd6e30
+          test "$(git -C harness rev-parse HEAD)" = "eb30a4b96d24ba228e2543c5e067b67af0cd6e30"
 
       - name: Download frozen intraday CC0 NQ source
         shell: bash
