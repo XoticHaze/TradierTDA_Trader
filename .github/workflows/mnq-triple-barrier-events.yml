@@ -1,0 +1,53 @@
+name: mnq-triple-barrier-events
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  event:
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [h6_k10, h12_k075, h12_k10, h24_k10]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact research harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/XoticHaze/TextConverterToolbox.git harness
+          git -C harness checkout --detach 273a84c0cc8dd2345016cc058656d4254c87cbfc
+          test "$(git -C harness rev-parse HEAD)" = "273a84c0cc8dd2345016cc058656d4254c87cbfc"
+      - name: Checkout exact deep MNQ source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/mbytes21/MNQ_DATA.git deep
+          git -C deep checkout --detach fc5508e2c152938d6d9eb70a36b888ae26107176
+          test "$(git -C deep rev-parse HEAD)" = "fc5508e2c152938d6d9eb70a36b888ae26107176"
+      - name: Install bounded dependencies
+        run: python -m pip install --disable-pip-version-check -q pandas numpy scikit-learn
+      - name: Execute prospective non-overlapping event learner
+        env:
+          CONFIG_KEY: ${{ matrix.config }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd harness
+          python -m research.mnq_triple_barrier_events \
+            --config-key "$CONFIG_KEY" \
+            --deep-root ../deep/plaintext_csv \
+            --output "../result/${CONFIG_KEY}.json"
+      - name: Upload metrics only
+        uses: actions/upload-artifact@v4
+        with:
+          name: mnq-triple-barrier-${{ matrix.config }}
+          path: result/${{ matrix.config }}.json
+          if-no-files-found: error
+          retention-days: 14
