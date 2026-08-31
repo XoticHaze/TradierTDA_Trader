@@ -1,0 +1,90 @@
+name: nq-alt-cc0-audit
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Download and inspect alternate public NQ dataset
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source result
+          meta='https://www.kaggle.com/api/v1/datasets/view/youneseloiarm/nasdaq-cme-future-nq'
+          data='https://www.kaggle.com/api/v1/datasets/download/youneseloiarm/nasdaq-cme-future-nq'
+          curl --fail --location --retry 4 --retry-all-errors "$meta" -o source/metadata.json
+          python - <<'PY'
+          import json
+          d=json.load(open('source/metadata.json', encoding='utf-8'))
+          t=json.dumps(d, sort_keys=True)
+          if 'CC0' not in t and 'Public Domain' not in t:
+              raise SystemExit('CC0/Public Domain license marker not observed')
+          print('LICENSE=PASS')
+          print('VERSION='+str(d.get('currentVersionNumber') or d.get('versionNumber') or 'unknown'))
+          PY
+          curl --fail --location --retry 4 --retry-all-errors "$data" -o source/nq-alt.zip
+          sha256sum source/nq-alt.zip | tee result/source.sha256
+          unzip -t source/nq-alt.zip >/dev/null
+          unzip -q source/nq-alt.zip -d source/unpacked
+          find source/unpacked -maxdepth 3 -type f -printf '%p\n' | sort | tee result/files.txt
+
+      - name: Build deterministic file/range audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -q pandas
+          python - <<'PY'
+          import csv, json, os, re
+          from pathlib import Path
+          import pandas as pd
+
+          root=Path('source/unpacked')
+          rows=[]
+          for p in sorted(root.rglob('*')):
+              if not p.is_file() or p.suffix.lower() not in {'.csv','.txt'}:
+                  continue
+              rec={'path':str(p.relative_to(root)), 'bytes':p.stat().st_size}
+              try:
+                  df=pd.read_csv(p)
+                  rec['rows']=int(len(df))
+                  rec['columns']=[str(c) for c in df.columns]
+                  candidates=[c for c in df.columns if str(c).lower() in {'date','datetime','timestamp','time'} or 'date' in str(c).lower() or 'time' in str(c).lower()]
+                  rec['time_candidates']=[str(c) for c in candidates]
+                  best=None
+                  for c in candidates:
+                      s=pd.to_datetime(df[c], errors='coerce', utc=True)
+                      good=int(s.notna().sum())
+                      if good and (best is None or good>best[0]):
+                          best=(good,c,s)
+                  if best:
+                      _,c,s=best
+                      rec['parsed_time_column']=str(c)
+                      rec['parsed_time_rows']=int(s.notna().sum())
+                      rec['first_timestamp']=s.min().isoformat()
+                      rec['last_timestamp']=s.max().isoformat()
+                      rec['duplicate_timestamps']=int(s[s.notna()].duplicated().sum())
+              except Exception as e:
+                  rec['parse_error']=repr(e)
+              rows.append(rec)
+          out={'schema':'xotichaze.nq_alt_cc0_audit.v1','dataset':'youneseloiarm/nasdaq-cme-future-nq','files':rows}
+          Path('result/nq-alt-cc0-audit.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          print('FILES',len(rows))
+          for r in rows:
+              print(r.get('path'), r.get('rows'), r.get('first_timestamp'), r.get('last_timestamp'), r.get('columns'))
+          PY
+
+      - name: Upload audit only
+        uses: actions/upload-artifact@v4
+        with:
+          name: nq-alt-cc0-audit
+          path: result/
+          if-no-files-found: error
+          retention-days: 30
