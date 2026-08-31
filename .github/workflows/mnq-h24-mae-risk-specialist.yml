@@ -1,0 +1,58 @@
+name: mnq-h24-mae-risk-specialist
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout exact research harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/XoticHaze/TextConverterToolbox.git harness
+          git -C harness checkout --detach daf647561c8d5bc576ff86675f48dab9d7913113
+          test "$(git -C harness rev-parse HEAD)" = "daf647561c8d5bc576ff86675f48dab9d7913113"
+
+      - name: Checkout exact deep MNQ source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/mbytes21/MNQ_DATA.git deep
+          git -C deep checkout --detach fc5508e2c152938d6d9eb70a36b888ae26107176
+          test "$(git -C deep rev-parse HEAD)" = "fc5508e2c152938d6d9eb70a36b888ae26107176"
+
+      - name: Install bounded dependencies
+        run: python -m pip install --disable-pip-version-check -q pandas numpy scikit-learn tzdata
+
+      - name: Execute H24 adverse-excursion risk challenge
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p result
+          cd harness
+          python -m research.mnq_h24_mae_risk_specialist \
+            --deep-root ../deep/plaintext_csv \
+            --output ../result/h24_mae_risk.json \
+            2>&1 | tee ../result/h24_mae_risk.log
+          rc=${PIPESTATUS[0]}
+          echo "MAE_RISK_EXIT_CODE=$rc" | tee -a ../result/h24_mae_risk.log
+          exit "$rc"
+
+      - name: Upload metrics and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mnq-h24-mae-risk-specialist
+          path: |
+            result/h24_mae_risk.json
+            result/h24_mae_risk.log
+          if-no-files-found: error
+          retention-days: 30
